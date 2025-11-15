@@ -19,7 +19,7 @@ export default function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      // Simulation d'envoi d'email - à remplacer par l'auth Supabase
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setEmailSent(true);
