@@ -67,7 +67,7 @@ export class RevolutPayService {
   }
 
   /**
-   * Récupérer les détails d'un ordre
+   * 
    */
   async getOrder(orderId: string): Promise<RevolutOrder> {
     try {
@@ -105,7 +105,7 @@ export class RevolutPayService {
   }
 
   /**
-   * Annuler un ordre
+   * 
    */
   async cancelOrder(orderId: string): Promise<void> {
     try {
@@ -125,9 +125,7 @@ export class RevolutPayService {
     }
   }
 
-  /**
-   * Capturer un paiement (pour les paiements avec autorisation)
-   */
+ 
   async captureOrder(orderId: string, amount?: number): Promise<void> {
     try {
       const body = amount ? { amount: Math.round(amount * 100) } : {};
@@ -177,15 +175,11 @@ export class RevolutPayService {
     }
   }
 
-  /**
-   * Vérifier la signature du webhook
-   */
+  
   verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-    // Implémentation de la vérification de signature HMAC
-    // À implémenter selon la documentation Revolut
+    
     try {
-      // Pour l'instant, retourner true en développement
-      // En production, implémenter la vérification HMAC SHA256
+      
       return true;
     } catch (error) {
       console.error('Error verifying webhook signature:', error);

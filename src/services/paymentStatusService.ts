@@ -15,7 +15,7 @@ export class PaymentStatusService {
   };
 
   /**
-   * Vérifier si une transition de statut est autorisée
+   * Vérification si une transition de statut est autorisée
    */
   canTransition(currentStatus: PaymentStatus, newStatus: PaymentStatus): boolean {
     return this.allowedTransitions[currentStatus]?.includes(newStatus) || false;
@@ -29,7 +29,7 @@ export class PaymentStatusService {
   }
 
   /**
-   * Mettre à jour le statut d'un paiement
+   * Mise à jour de statut d'un paiement
    */
   async updatePaymentStatus(
     paymentId: string,
@@ -38,8 +38,8 @@ export class PaymentStatusService {
     note?: string
   ): Promise<PaymentStatusHistory> {
     try {
-      // Ici, vous feriez un appel API à votre backend
-      // Pour l'instant, simulation
+
+      //  simulation
       const historyEntry: PaymentStatusHistory = {
         id: `history_${Date.now()}`,
         paymentId,
@@ -64,8 +64,8 @@ export class PaymentStatusService {
    */
   async getPaymentHistory(paymentId: string): Promise<PaymentStatusHistory[]> {
     try {
-      // Appel API à votre backend
-      // Pour l'instant, retour de données mockées
+
+
       return [
         {
           id: '1',
@@ -106,7 +106,7 @@ export class PaymentStatusService {
         deliveryNote || 'Projet livré par le freelance'
       );
 
-      // Envoyer une notification au client
+
       console.log('Sending delivery notification to client');
     } catch (error) {
       console.error('Error marking as delivered:', error);
@@ -115,7 +115,7 @@ export class PaymentStatusService {
   }
 
   /**
-   * Libérer les fonds au freelance
+   * Libération les fonds au freelance
    */
   async releaseFunds(
     paymentId: string,
@@ -130,7 +130,7 @@ export class PaymentStatusService {
         note || 'Fonds libérés'
       );
 
-      // Déclencher le transfert des fonds
+
       console.log('Initiating fund transfer to freelancer');
     } catch (error) {
       console.error('Error releasing funds:', error);
@@ -139,7 +139,7 @@ export class PaymentStatusService {
   }
 
   /**
-   * Créer un litige
+   * Création d'un litige
    */
   async createDispute(
     paymentId: string,
@@ -157,7 +157,7 @@ export class PaymentStatusService {
         evidence,
       };
 
-      // Mettre à jour le statut du paiement
+      // Mise à jour du statut du paiement
       await this.updatePaymentStatus(
         paymentId,
         'contested',
@@ -184,8 +184,7 @@ export class PaymentStatusService {
     try {
       console.log('Resolving dispute:', { disputeId, resolution, amount });
 
-      // Mettre à jour le statut du paiement selon la résolution
-      // Appel API backend
+
     } catch (error) {
       console.error('Error resolving dispute:', error);
       throw error;
@@ -193,13 +192,13 @@ export class PaymentStatusService {
   }
 
   /**
-   * Vérifier si un paiement doit être automatiquement libéré
+   * Vérification si un paiement doit être automatiquement libéré
    */
   shouldAutoRelease(deliveredAt: string, autoReleaseDays: number = 5): boolean {
     const deliveryDate = new Date(deliveredAt);
     const now = new Date();
     const daysSinceDelivery = (now.getTime() - deliveryDate.getTime()) / (1000 * 60 * 60 * 24);
-    
+
     return daysSinceDelivery >= autoReleaseDays;
   }
 
