@@ -7,70 +7,20 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      payment_links: {
-        Row: {
-          amount: number
-          client_email: string | null
-          client_name: string
-          created_at: string
-          delivered_at: string | null
-          expires_at: string
-          freelancer_id: string
-          id: string
-          link_url: string
-          pdf_url: string | null
-          project_name: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          client_email?: string | null
-          client_name: string
-          created_at?: string
-          delivered_at?: string | null
-          expires_at: string
-          freelancer_id: string
-          id?: string
-          link_url: string
-          pdf_url?: string | null
-          project_name: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          client_email?: string | null
-          client_name?: string
-          created_at?: string
-          delivered_at?: string | null
-          expires_at?: string
-          freelancer_id?: string
-          id?: string
-          link_url?: string
-          pdf_url?: string | null
-          project_name?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      update_payment_link_status: {
-        Args: { payment_link_id: string; new_status: string }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
