@@ -27,7 +27,7 @@ export default function Hero() {
             Ta mission en{" "}
             <span className="text-primary font-medium">confiance</span>.
           </h1>
-          
+
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light px-4">
             Holdpay.io te permet de recevoir un acompte sécurisé avant de commencer ta mission freelance.
             <br className="hidden sm:block" />
@@ -37,9 +37,9 @@ export default function Hero() {
 
         {/* CTA */}
         <div className="flex flex-col gap-4 justify-center items-center pt-12 px-4">
-          <Button 
-            size="lg" 
-            asChild 
+          <Button
+            size="lg"
+            asChild
             className="text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 bg-primary/90 hover:bg-primary backdrop-blur-md border border-primary/20 text-primary-foreground rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
           >
             <Link to="/register">

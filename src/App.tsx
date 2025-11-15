@@ -9,6 +9,7 @@ import CreatePaymentLink from "./pages/CreatePaymentLink";
 import PaymentLinkDetailsPage from "./pages/PaymentLinkDetailsPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import ClientPayment from "./pages/ClientPayment";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard/payment-link/:id" element={<PaymentLinkDetailsPage />} />
           <Route path="/create" element={<CreatePaymentLink />} />
           <Route path="/pay/:slug" element={<ClientPayment />} />
