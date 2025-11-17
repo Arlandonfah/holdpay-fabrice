@@ -8,12 +8,14 @@ import { Navigation } from "@/components/layout/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { Shield, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function Register() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const { signUp } = useAuthContext();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -52,21 +54,23 @@ export default function Register() {
     }
 
     try {
-      // Simulation d'inscription - à remplacer par l'auth Supabase
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Compte créé avec succès !",
-        description: "Bienvenue sur Holdpay, vous pouvez maintenant créer vos liens de paiement"
-      });
-      
-      navigate("/dashboard");
+      const result = await signUp(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
+
+      if (result.success) {
+        // Supabase peut nécessiter une confirmation email
+        toast({
+          title: "Compte créé !",
+          description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous."
+        });
+        navigate("/login");
+      }
     } catch (error) {
-      toast({
-        title: "Erreur d'inscription",
-        description: "Une erreur est survenue lors de la création du compte",
-        variant: "destructive"
-      });
+      console.error('Erreur lors de l\'inscription:', error);
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +79,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/20">
       <Navigation isAuthenticated={false} />
-      
+
       <div className="container mx-auto px-4 py-16 max-w-md">
         <Card>
           <CardHeader className="text-center space-y-4">
@@ -87,7 +91,7 @@ export default function Register() {
               Rejoignez Holdpay et sécurisez vos paiements
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -101,7 +105,7 @@ export default function Register() {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Nom</Label>
                   <Input
@@ -113,7 +117,7 @@ export default function Register() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
@@ -128,7 +132,7 @@ export default function Register() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password" className="flex items-center gap-2">
                   <Lock className="h-4 w-4" />
@@ -143,7 +147,7 @@ export default function Register() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
                 <Input

@@ -2,58 +2,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navigation } from "@/components/layout/navigation";
-import { PaymentLinkCard, PaymentLink } from "@/components/ui/payment-link-card";
+import { PaymentLinkCard } from "@/components/ui/payment-link-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, BarChart3, Euro, TrendingUp, Copy, Check } from "lucide-react";
-
-// Mock data - à remplacer par de vraies données plus tard
-const mockPaymentLinks: PaymentLink[] = [
-  {
-    id: "1",
-    clientName: "Marie Dubois",
-    projectName: "Site vitrine restaurant",
-    amount: 2500,
-    status: "paid",
-    createdAt: "2024-01-15",
-    expiresAt: "2024-02-15",
-    pdfUrl: "/contract.pdf",
-    linkUrl: "https://holdpay.io/pay/abc123",
-    freelancer_id: "user123"
-  },
-  {
-    id: "2", 
-    clientName: "Jean Martin",
-    projectName: "Application mobile",
-    amount: 8500,
-    status: "delivered",
-    createdAt: "2024-01-10",
-    expiresAt: "2024-02-10",
-    pdfUrl: "/proposal.pdf",
-    linkUrl: "https://holdpay.io/pay/def456",
-    freelancer_id: "user123"
-  },
-  {
-    id: "3",
-    clientName: "Sophie Laurent",
-    projectName: "Refonte logo & identité",
-    amount: 1200,
-    status: "pending",
-    createdAt: "2024-01-20",
-    expiresAt: "2024-02-20",
-    linkUrl: "https://holdpay.io/pay/ghi789",
-    freelancer_id: "user456"
-  }
-];
+import { useAuthContext } from "@/contexts/AuthContext";
+import { usePaymentLinks } from "@/hooks/usePaymentLinks";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  
+  const { isAuthenticated, userName, signOut, user } = useAuthContext();
+  const { paymentLinks, loading, error, refetch } = usePaymentLinks();
+
   // Mock current user - à remplacer par une vraie authentification
-  const currentUserId = "user123";
+  const currentUserId = user?.id || "user123";
 
   const handleCopyLink = async (url: string) => {
     try {
@@ -78,15 +43,19 @@ export default function Dashboard() {
     navigate(`/dashboard/payment-link/${id}`);
   };
 
-  const totalAmount = mockPaymentLinks.reduce((sum, link) => sum + link.amount, 0);
-  const paidAmount = mockPaymentLinks
+  const totalAmount = paymentLinks.reduce((sum, link) => sum + link.amount, 0);
+  const paidAmount = paymentLinks
     .filter(link => ["paid", "delivered", "released"].includes(link.status))
     .reduce((sum, link) => sum + link.amount, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
-      <Navigation isAuthenticated={true} />
-      
+      <Navigation
+        isAuthenticated={isAuthenticated}
+        userName={userName}
+        onLogout={signOut}
+      />
+
       <div className="container mx-auto px-6 py-24 max-w-7xl">
         {/* Header - Style Airbnb épuré */}
         <div className="mb-16">
@@ -96,9 +65,9 @@ export default function Dashboard() {
           <p className="text-xl text-muted-foreground font-light mb-12">
             Gérez vos paiements en toute simplicité
           </p>
-          
-          <Button 
-            asChild 
+
+          <Button
+            asChild
             size="lg"
             className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl px-8 py-3 font-medium shadow-sm hover:shadow-md transition-all"
           >
@@ -152,7 +121,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Projets actifs</p>
               <p className="text-3xl font-light text-foreground">
-                {mockPaymentLinks.filter(link => link.status !== "released").length}
+                {paymentLinks.filter(link => link.status !== "released").length}
               </p>
               <p className="text-sm text-warning font-medium">En cours</p>
             </div>
@@ -167,19 +136,25 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          {mockPaymentLinks.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Chargement des liens de paiement...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-destructive">{error}</p>
+              <Button onClick={refetch} className="mt-4">Réessayer</Button>
+            </div>
+          ) : paymentLinks.length > 0 ? (
             <div className="space-y-6">
-              {mockPaymentLinks.map((paymentLink) => (
+              {paymentLinks.map((paymentLink) => (
                 <PaymentLinkCard
                   key={paymentLink.id}
                   paymentLink={paymentLink}
                   onViewDetails={handleViewDetails}
                   onCopyLink={handleCopyLink}
                   currentUserId={currentUserId}
-                  refetch={() => {
-                    // Fonction de rafraîchissement - à implémenter avec Supabase
-                    console.log("Refreshing payment links...");
-                  }}
+                  refetch={refetch}
                 />
               ))}
             </div>
@@ -195,9 +170,9 @@ export default function Dashboard() {
                     Créez votre premier lien de paiement sécurisé en quelques clics
                   </p>
                 </div>
-                <Button 
-                  size="lg" 
-                  asChild 
+                <Button
+                  size="lg"
+                  asChild
                   className="bg-primary/90 hover:bg-primary backdrop-blur-md border border-primary/20 text-primary-foreground rounded-xl px-8 py-3 shadow-lg"
                 >
                   <Link to="/create">

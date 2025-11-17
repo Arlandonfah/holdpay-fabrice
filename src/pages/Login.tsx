@@ -7,11 +7,14 @@ import { Navigation } from "@/components/layout/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { Shield, Mail, Lock, ArrowRight } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { createTestUser, testLogin, checkSupabaseConfig } from "@/utils/createTestUser";
 
 export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isAuthenticated } = useAuthContext();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -26,21 +29,13 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Simulation de connexion - à remplacer par l'auth Supabase
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Connexion réussie !",
-        description: "Bienvenue sur votre dashboard Holdpay"
-      });
-      
-      navigate("/dashboard");
+      const result = await signIn(formData.email, formData.password);
+
+      if (result.success) {
+        navigate("/dashboard");
+      }
     } catch (error) {
-      toast({
-        title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect",
-        variant: "destructive"
-      });
+      console.error('Erreur lors de la connexion:', error);
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +44,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/20">
       <Navigation isAuthenticated={false} />
-      
+
       <div className="container mx-auto px-4 py-16 max-w-md">
         <Card>
           <CardHeader className="text-center space-y-4">
@@ -61,7 +56,7 @@ export default function Login() {
               Accédez à votre dashboard Holdpay
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -78,7 +73,7 @@ export default function Login() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password" className="flex items-center gap-2">
                   <Lock className="h-4 w-4" />
@@ -110,14 +105,64 @@ export default function Login() {
               </Button>
             </form>
 
+            {/* Boutons de test temporaires - À SUPPRIMER EN PRODUCTION */}
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 mb-3 font-medium">🧪 Outils de diagnostic (DEV uniquement)</p>
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={async () => {
+                    await checkSupabaseConfig();
+                  }}
+                >
+                  Vérifier config Supabase
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={async () => {
+                    const result = await createTestUser();
+                    toast({
+                      title: result.success ? "Utilisateur créé" : "Erreur",
+                      description: result.success ? "Vérifiez la console" : "Voir console pour détails",
+                      variant: result.success ? "default" : "destructive"
+                    });
+                  }}
+                >
+                  Créer utilisateur test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={async () => {
+                    const result = await testLogin();
+                    toast({
+                      title: result.success ? "Test connexion OK" : "Test connexion échoué",
+                      description: "Vérifiez la console",
+                      variant: result.success ? "default" : "destructive"
+                    });
+                  }}
+                >
+                  Tester connexion directe
+                </Button>
+              </div>
+            </div>
+
             <div className="mt-6 text-center space-y-2">
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="text-sm text-muted-foreground hover:text-primary underline"
               >
                 Mot de passe oublié ?
               </Link>
-              
+
               <div className="text-sm text-muted-foreground">
                 Pas encore de compte ?{" "}
                 <Link to="/register" className="text-primary hover:underline">

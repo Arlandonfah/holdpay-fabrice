@@ -6,14 +6,18 @@ import FeatureGrid from "@/components/landing/FeatureGrid";
 import Testimonial from "@/components/landing/Testimonial";
 import FinalCTA from "@/components/landing/FinalCTA";
 import FooterMinimal from "@/components/landing/FooterMinimal";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function Home() {
-  // Mock auth state - à remplacer par le vrai état d'auth plus tard
-  const isAuthenticated = false;
+  const { isAuthenticated, userName, signOut } = useAuthContext();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navigation isAuthenticated={isAuthenticated} />
+      <Navigation
+        isAuthenticated={isAuthenticated}
+        userName={userName}
+        onLogout={signOut}
+      />
       <Hero />
       <FeatureSection />
       <TimelineSteps />

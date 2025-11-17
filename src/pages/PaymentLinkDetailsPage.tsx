@@ -8,12 +8,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DeliverButton } from "@/components/ui/deliver-button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Euro, 
-  FileText, 
-  User, 
+import {
+  ArrowLeft,
+  Calendar,
+  Euro,
+  FileText,
+  User,
   Mail,
   Download,
   Clock,
@@ -44,7 +44,7 @@ export default function PaymentLinkDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [paymentLink, setPaymentLink] = useState<PaymentLinkData | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -54,12 +54,12 @@ export default function PaymentLinkDetailsPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
         navigate("/login");
         return;
       }
-      
+
       setUser(session.user);
     };
 
@@ -88,8 +88,8 @@ export default function PaymentLinkDetailsPage() {
         setLoading(true);
         setError(null);
 
-        const { data, error: fetchError } = await supabase
-          .from('payment_links')
+        const { data, error: fetchError } = await (supabase as any)
+          .from('payments')
           .select('*')
           .eq('id', id)
           .eq('freelancer_id', user.id)
@@ -130,8 +130,8 @@ export default function PaymentLinkDetailsPage() {
     if (!id || !user) return;
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('payment_links')
+      const { data, error: fetchError } = await (supabase as any)
+        .from('payments')
         .select('*')
         .eq('id', id)
         .eq('freelancer_id', user.id)
@@ -182,15 +182,15 @@ export default function PaymentLinkDetailsPage() {
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <Navigation isAuthenticated={true} />
         <div className="container mx-auto px-6 py-24 max-w-4xl">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="mb-6 text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/dashboard")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour au dashboard
           </Button>
-          
+
           <Card className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-12 text-center">
             <div className="space-y-6">
               <div className="p-6 bg-destructive/20 backdrop-blur-sm rounded-2xl w-fit mx-auto border border-destructive/30">
@@ -226,19 +226,19 @@ export default function PaymentLinkDetailsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
       <Navigation isAuthenticated={true} />
-      
+
       <div className="container mx-auto px-6 py-24 max-w-4xl">
         {/* Header avec bouton retour */}
         <div className="mb-12">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="mb-6 text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/dashboard")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour au dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-medium text-foreground mb-2">
@@ -290,7 +290,7 @@ export default function PaymentLinkDetailsPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Montant</label>
                     <div className="flex items-center gap-2">
@@ -300,7 +300,7 @@ export default function PaymentLinkDetailsPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Date de création</label>
                     <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export default function PaymentLinkDetailsPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Date d'expiration</label>
                     <div className="flex items-center gap-2">
@@ -373,7 +373,7 @@ export default function PaymentLinkDetailsPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {paymentLink.status !== "pending" && (
                     <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg">
                       <div className="p-2 bg-success/20 rounded-full">
@@ -387,7 +387,7 @@ export default function PaymentLinkDetailsPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {paymentLink.delivered_at && (
                     <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg">
                       <div className="p-2 bg-primary/20 rounded-full">
@@ -452,14 +452,14 @@ export default function PaymentLinkDetailsPage() {
                     <span className="text-sm text-muted-foreground">Statut</span>
                     <StatusBadge status={paymentLink.status as any} />
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Jours restants</span>
                     <span className={`text-sm font-medium ${isExpired ? 'text-destructive' : 'text-foreground'}`}>
                       {isExpired ? 'Expiré' : Math.ceil((new Date(paymentLink.expires_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Document</span>
                     <span className="text-sm font-medium text-foreground">

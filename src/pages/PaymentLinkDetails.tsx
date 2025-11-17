@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DeliverButton } from "@/components/ui/deliver-button";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Euro, 
-  FileText, 
-  Link2, 
-  User, 
+import { usePaymentLink } from "@/hooks/usePaymentLink";
+import { useAuthContext } from "@/contexts/AuthContext";
+import {
+  ArrowLeft,
+  Calendar,
+  Euro,
+  FileText,
+  Link2,
+  User,
   Mail,
   Copy,
   Check,
@@ -25,65 +27,62 @@ import {
 } from "lucide-react";
 import { PaymentLink } from "@/components/ui/payment-link-card";
 
-// Mock data - à remplacer par de vraies données plus tard
-const mockPaymentLinks: PaymentLink[] = [
-  {
-    id: "1",
-    clientName: "Marie Dubois",
-    projectName: "Site vitrine restaurant",
-    amount: 2500,
-    status: "paid",
-    createdAt: "2024-01-15",
-    expiresAt: "2024-02-15",
-    pdfUrl: "/contract.pdf",
-    linkUrl: "https://holdpay.io/pay/abc123",
-    freelancer_id: "user123"
-  },
-  {
-    id: "2", 
-    clientName: "Jean Martin",
-    projectName: "Application mobile",
-    amount: 8500,
-    status: "delivered",
-    createdAt: "2024-01-10",
-    expiresAt: "2024-02-10",
-    pdfUrl: "/proposal.pdf",
-    linkUrl: "https://holdpay.io/pay/def456",
-    freelancer_id: "user123"
-  },
-  {
-    id: "3",
-    clientName: "Sophie Laurent",
-    projectName: "Refonte logo & identité",
-    amount: 1200,
-    status: "pending",
-    createdAt: "2024-01-20",
-    expiresAt: "2024-02-20",
-    linkUrl: "https://holdpay.io/pay/ghi789",
-    freelancer_id: "user456"
-  }
-];
-
 export default function PaymentLinkDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
-  
-  // Mock current user - à remplacer par une vraie authentification
-  const currentUserId = "user123";
+  const { user, isAuthenticated, userName, signOut } = useAuthContext();
 
-  // Trouver le payment link correspondant
-  const paymentLink = mockPaymentLinks.find(link => link.id === id);
+  // Récupérer le lien de paiement depuis Supabase
+  const { paymentLink, loading, error, refetch } = usePaymentLink(id || '');
 
   useEffect(() => {
-    if (!paymentLink) {
+    if (!loading && !paymentLink && !error) {
       navigate("/dashboard");
     }
-  }, [paymentLink, navigate]);
+  }, [paymentLink, loading, error, navigate]);
 
-  if (!paymentLink) {
-    return null;
+  // Affichage du loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
+        <Navigation
+          isAuthenticated={isAuthenticated}
+          userName={userName}
+          onLogout={signOut}
+        />
+        <div className="container mx-auto px-6 py-24 max-w-4xl">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Chargement des détails...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage de l'erreur
+  if (error || !paymentLink) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
+        <Navigation
+          isAuthenticated={isAuthenticated}
+          userName={userName}
+          onLogout={signOut}
+        />
+        <div className="container mx-auto px-6 py-24 max-w-4xl">
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-medium text-foreground mb-4">Accès refusé</h2>
+            <p className="text-muted-foreground mb-6">
+              {error || "Erreur lors du chargement des données."}
+            </p>
+            <Button onClick={() => navigate("/dashboard")}>
+              Retour au dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleCopy = async (text: string, type: string) => {
@@ -125,20 +124,24 @@ export default function PaymentLinkDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
-      <Navigation isAuthenticated={true} />
-      
+      <Navigation
+        isAuthenticated={isAuthenticated}
+        userName={userName}
+        onLogout={signOut}
+      />
+
       <div className="container mx-auto px-6 py-24 max-w-4xl">
         {/* Header avec bouton retour */}
         <div className="mb-12">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="mb-6 text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/dashboard")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour au dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-4xl font-medium text-foreground mb-2">
@@ -180,7 +183,7 @@ export default function PaymentLinkDetails() {
                       <span className="text-foreground">{paymentLink.clientName}</span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Montant</label>
                     <div className="flex items-center gap-2">
@@ -190,7 +193,7 @@ export default function PaymentLinkDetails() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Date de création</label>
                     <div className="flex items-center gap-2">
@@ -200,7 +203,7 @@ export default function PaymentLinkDetails() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Date d'expiration</label>
                     <div className="flex items-center gap-2">
@@ -276,7 +279,7 @@ export default function PaymentLinkDetails() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {paymentLink.status !== "pending" && (
                     <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg">
                       <div className="p-2 bg-success/20 rounded-full">
@@ -290,7 +293,7 @@ export default function PaymentLinkDetails() {
                       </div>
                     </div>
                   )}
-                  
+
                   {paymentLink.status === "delivered" && (
                     <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg">
                       <div className="p-2 bg-primary/20 rounded-full">
@@ -322,22 +325,19 @@ export default function PaymentLinkDetails() {
                   paymentLink={{
                     status: paymentLink.status,
                     freelancer_id: paymentLink.freelancer_id,
-                    client_email: "client@example.com", // À récupérer depuis la vraie DB
+                    client_email: paymentLink.client_email || "client@example.com",
                     client_name: paymentLink.clientName,
                     project_name: paymentLink.projectName,
                     link_url: paymentLink.linkUrl
                   }}
-                  currentUserId={currentUserId}
-                  refetch={() => {
-                    // Fonction de rafraîchissement
-                    console.log("Refreshing payment link details...");
-                  }}
+                  currentUserId={user?.id || ""}
+                  refetch={refetch}
                 />
 
                 {/* Autres actions */}
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => handleCopy(paymentLink.linkUrl, "Lien")}
                 >
                   {copiedItem === "Lien" ? (
@@ -375,14 +375,14 @@ export default function PaymentLinkDetails() {
                     <span className="text-sm text-muted-foreground">Statut</span>
                     <StatusBadge status={paymentLink.status} />
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Jours restants</span>
                     <span className={`text-sm font-medium ${isExpired ? 'text-destructive' : 'text-foreground'}`}>
                       {isExpired ? 'Expiré' : Math.ceil((new Date(paymentLink.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Document</span>
                     <span className="text-sm font-medium text-foreground">

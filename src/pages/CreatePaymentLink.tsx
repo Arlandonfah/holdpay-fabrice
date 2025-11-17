@@ -8,11 +8,14 @@ import { Navigation } from "@/components/layout/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Upload, FileText, Calendar, Euro, User, Briefcase, ArrowLeft } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function CreatePaymentLink() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { user, isAuthenticated, userName, signOut } = useAuthContext();
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
@@ -66,16 +69,64 @@ export default function CreatePaymentLink() {
     }
 
     try {
-      // Simulation de création de lien - à remplacer par l'API Supabase
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      if (!user) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Vous devez être connecté pour créer un lien",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Calculer la date d'expiration
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + parseInt(formData.expirationDays));
+
+      // Générer un slug unique pour le lien
+      const slug = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const linkUrl = `${window.location.origin}/pay/${slug}`;
+
+      // Créer l'enregistrement dans Supabase
+      const { data, error } = await (supabase as any)
+        .from('payments')
+        .insert([
+          {
+            freelancer_id: user.id,
+            client_name: formData.clientName,
+            client_email: formData.clientEmail,
+            project_name: formData.projectName,
+            amount: parseFloat(formData.amount),
+            status: 'pending',
+            expires_at: expiresAt.toISOString(),
+            link_url: linkUrl,
+            pdf_url: formData.pdfFile ? 'pending_upload' : null, // TODO: Gérer l'upload de fichier
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        toast({
+          title: "Erreur de sauvegarde",
+          description: `Impossible de créer le lien: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Lien créé avec succès:', data);
+
       toast({
         title: "Lien créé avec succès !",
         description: "Votre lien de paiement a été généré et est prêt à être partagé"
       });
-      
+
       navigate("/dashboard");
     } catch (error) {
+      console.error('Erreur lors de la création:', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la création du lien",
@@ -88,8 +139,12 @@ export default function CreatePaymentLink() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation isAuthenticated={true} />
-      
+      <Navigation
+        isAuthenticated={isAuthenticated}
+        userName={userName}
+        onLogout={signOut}
+      />
+
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="mb-8">
@@ -97,7 +152,7 @@ export default function CreatePaymentLink() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour au dashboard
           </Button>
-          
+
           <h1 className="text-3xl font-bold text-primary">Nouveau lien de paiement</h1>
           <p className="text-muted-foreground">
             Créez un lien sécurisé pour recevoir un paiement escrow
@@ -111,7 +166,7 @@ export default function CreatePaymentLink() {
               Informations du projet
             </CardTitle>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Informations client */}
@@ -120,7 +175,7 @@ export default function CreatePaymentLink() {
                   <User className="h-4 w-4" />
                   Informations client
                 </h3>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="clientName">Nom du client *</Label>
@@ -132,7 +187,7 @@ export default function CreatePaymentLink() {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="clientEmail">Email du client *</Label>
                     <Input
@@ -150,7 +205,7 @@ export default function CreatePaymentLink() {
               {/* Informations projet */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Détails du projet</h3>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="projectName">Nom du projet *</Label>
                   <Input
@@ -161,7 +216,7 @@ export default function CreatePaymentLink() {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="description">Description (optionnel)</Label>
                   <Textarea
@@ -192,7 +247,7 @@ export default function CreatePaymentLink() {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="expirationDays" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -245,7 +300,7 @@ export default function CreatePaymentLink() {
                 >
                   Annuler
                 </Button>
-                
+
                 <Button
                   type="submit"
                   disabled={isLoading}
