@@ -18,7 +18,7 @@ export function useAuth() {
     const { toast } = useToast();
 
     useEffect(() => {
-        
+
         const getSession = async () => {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
@@ -41,7 +41,7 @@ export function useAuth() {
 
         getSession();
 
-        
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 console.log('Auth state changed:', event, session);
@@ -66,7 +66,7 @@ export function useAuth() {
                 return;
             }
 
-            
+
             const { data, error } = await supabase
                 .from('users')
                 .select('id, email, firstName, lastName')
@@ -134,7 +134,7 @@ export function useAuth() {
                 description: "Vous avez été déconnecté avec succès",
             });
 
-            
+
         } catch (error) {
             console.error('Erreur lors de la déconnexion:', error);
             toast({
@@ -147,8 +147,11 @@ export function useAuth() {
 
     const signIn = async (email: string, password: string) => {
         try {
+            const cleanedEmail = email
+                .trim()
+                .replace(/^["'“”]+|["'“”]+$/g, "");
             const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: cleanedEmail,
                 password,
             });
 
@@ -180,8 +183,17 @@ export function useAuth() {
 
     const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
         try {
+            const cleanedEmail = email
+                .trim()
+                .replace(/^["'“”]+|["'“”]+$/g, "");
+            console.log('EMAIL AVANT SIGNUP:', {
+                raw: email,
+                cleaned: cleanedEmail,
+                json: JSON.stringify(cleanedEmail),
+            });
+
             const { data, error } = await supabase.auth.signUp({
-                email,
+                email: cleanedEmail,
                 password,
                 options: {
                     data: {
@@ -202,18 +214,18 @@ export function useAuth() {
             }
 
             // Si l'inscription réussit, création de profil dans la table users
-           
+
             if (data.user) {
                 try {
                     await supabase
                         .from('users')
                         .insert([
                             {
-                                
+
                                 email: email,
                                 firstName: firstName,
                                 lastName: lastName,
-                            
+
                             }
                         ]);
                 } catch (profileError) {
