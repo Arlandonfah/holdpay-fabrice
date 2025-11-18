@@ -4,6 +4,12 @@ Projet front-end (Vite + React + TypeScript) pour la démo **Holdpay** : inscr
 
 URL de prod Lovable : `https://holdpay-fabrice.lovable.app/`
 
+Email de test si vous n'avez pas besoin de creer:
+
+email: test4@gmail.com
+
+password: test41234
+
 ---
 
 ## 1. Installation et exécution en local
