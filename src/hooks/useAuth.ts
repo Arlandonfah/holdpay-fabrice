@@ -18,7 +18,7 @@ export function useAuth() {
     const { toast } = useToast();
 
     useEffect(() => {
-        // Récupérer la session actuelle
+        
         const getSession = async () => {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
@@ -41,7 +41,7 @@ export function useAuth() {
 
         getSession();
 
-        // Écouter les changements d'authentification
+        
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 console.log('Auth state changed:', event, session);
@@ -62,42 +62,56 @@ export function useAuth() {
 
     const fetchUserProfile = async (userId: string) => {
         try {
-            // Essayer de récupérer le profil depuis la table users
-            const { data, error } = await supabase
-                .from('users')
-                .select('id, email, firstName, lastName')
-                .eq('id', userId)
-                .single();
-
-            if (error) {
-                console.log('Profil utilisateur non trouvé dans la table users, utilisation des données auth');
-                // Si pas de profil dans la table users, utiliser les données de auth
-                if (user?.email) {
-                    setUserProfile({
-                        id: userId,
-                        email: user.email,
-                        fullName: user.user_metadata?.full_name || user.email.split('@')[0]
-                    });
-                }
+            if (!user?.email) {
                 return;
             }
 
-            if (data) {
+            
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, email, firstName, lastName')
+                .eq('email', user.email)
+                .single();
+
+            if (error || !data) {
+                console.log('Profil utilisateur non trouvé dans la table users, utilisation des métadonnées auth');
                 setUserProfile({
-                    ...data,
-                    fullName: data.firstName && data.lastName
-                        ? `${data.firstName} ${data.lastName}`
-                        : data.firstName || data.lastName || data.email.split('@')[0]
+                    id: userId,
+                    email: user.email,
+                    firstName: user.user_metadata?.firstName,
+                    lastName: user.user_metadata?.lastName,
+                    fullName:
+                        user.user_metadata?.full_name ||
+                        (user.user_metadata?.firstName && user.user_metadata?.lastName
+                            ? `${user.user_metadata.firstName} ${user.user_metadata.lastName}`
+                            : user.email.split('@')[0])
                 });
+                return;
             }
+
+            setUserProfile({
+                id: String(data.id),
+                email: data.email,
+                firstName: (data as any).firstName ?? undefined,
+                lastName: (data as any).lastName ?? undefined,
+                fullName:
+                    ((data as any).firstName && (data as any).lastName
+                        ? `${(data as any).firstName} ${(data as any).lastName}`
+                        : (data as any).firstName || (data as any).lastName || data.email.split('@')[0])
+            });
         } catch (error) {
             console.error('Erreur lors de la récupération du profil:', error);
-            // Fallback avec les données auth
             if (user?.email) {
                 setUserProfile({
                     id: userId,
                     email: user.email,
-                    fullName: user.user_metadata?.full_name || user.email.split('@')[0]
+                    firstName: user.user_metadata?.firstName,
+                    lastName: user.user_metadata?.lastName,
+                    fullName:
+                        user.user_metadata?.full_name ||
+                        (user.user_metadata?.firstName && user.user_metadata?.lastName
+                            ? `${user.user_metadata.firstName} ${user.user_metadata.lastName}`
+                            : user.email.split('@')[0])
                 });
             }
         }
@@ -120,7 +134,7 @@ export function useAuth() {
                 description: "Vous avez été déconnecté avec succès",
             });
 
-            // Redirection sera gérée par l'état auth
+            
         } catch (error) {
             console.error('Erreur lors de la déconnexion:', error);
             toast({
@@ -187,21 +201,23 @@ export function useAuth() {
                 return { success: false, error };
             }
 
-            // Si l'inscription réussit, créer le profil dans la table users
+            // Si l'inscription réussit, création de profil dans la table users
+           
             if (data.user) {
                 try {
                     await supabase
                         .from('users')
                         .insert([
                             {
-                                id: data.user.id,
+                                
                                 email: email,
                                 firstName: firstName,
                                 lastName: lastName,
+                            
                             }
                         ]);
                 } catch (profileError) {
-                    console.log('Erreur lors de la création du profil (table users peut ne pas exister):', profileError);
+                    console.log('Erreur lors de la création du profil (table users peut ne pas exister ou RLS):', profileError);
                 }
             }
 

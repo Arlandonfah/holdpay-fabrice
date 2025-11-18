@@ -41,7 +41,7 @@ export default function CreatePaymentLink() {
         });
         return;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB
+      if (file.size > 10 * 1024 * 1024) { 
         toast({
           title: "Fichier trop volumineux",
           description: "Le fichier ne doit pas dépasser 10MB",
@@ -57,7 +57,7 @@ export default function CreatePaymentLink() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validation basique
+    
     if (!formData.clientName || !formData.clientEmail || !formData.projectName || !formData.amount) {
       toast({
         title: "Champs manquants",
@@ -79,15 +79,15 @@ export default function CreatePaymentLink() {
         return;
       }
 
-      // Calculer la date d'expiration
+      
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + parseInt(formData.expirationDays));
 
-      // Générer un slug unique pour le lien
+     
       const slug = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const linkUrl = `${window.location.origin}/pay/${slug}`;
 
-      // Créer l'enregistrement dans Supabase
+      // Création d'enregistrement dans Supabase
       const { data, error } = await (supabase as any)
         .from('payments')
         .insert([
@@ -100,7 +100,7 @@ export default function CreatePaymentLink() {
             status: 'pending',
             expires_at: expiresAt.toISOString(),
             link_url: linkUrl,
-            pdf_url: formData.pdfFile ? 'pending_upload' : null, // TODO: Gérer l'upload de fichier
+            pdf_url: formData.pdfFile ? 'pending_upload' : null,
             created_at: new Date().toISOString()
           }
         ])

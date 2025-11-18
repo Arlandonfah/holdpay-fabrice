@@ -56,7 +56,7 @@ export function PaymentStatusManager({
     try {
       await paymentStatusService.markAsDelivered(
         paymentId,
-        'freelancer_id', // À remplacer par l'ID réel
+        'freelancer_id', 
         'Projet livré et prêt pour validation'
       );
       

@@ -34,7 +34,7 @@ export default function PaymentLinkDetails() {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const { user, isAuthenticated, userName, signOut } = useAuthContext();
 
-  // Récupérer le lien de paiement depuis Supabase
+ 
   const { paymentLink, loading, error, refetch } = usePaymentLink(id || '');
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function PaymentLinkDetails() {
     }
   }, [paymentLink, loading, error, navigate]);
 
-  // Affichage du loading
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
@@ -61,7 +61,7 @@ export default function PaymentLinkDetails() {
     );
   }
 
-  // Affichage de l'erreur
+  
   if (error || !paymentLink) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">

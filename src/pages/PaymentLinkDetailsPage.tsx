@@ -50,7 +50,7 @@ export default function PaymentLinkDetailsPage() {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Vérifier l'authentification et récupérer l'utilisateur
+ 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -65,7 +65,7 @@ export default function PaymentLinkDetailsPage() {
 
     checkAuth();
 
-    // Écouter les changements d'authentification
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!session?.user) {
@@ -79,7 +79,7 @@ export default function PaymentLinkDetailsPage() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Récupérer les données du payment link
+
   useEffect(() => {
     const fetchPaymentLink = async () => {
       if (!id || !user) return;

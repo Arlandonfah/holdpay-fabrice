@@ -20,12 +20,12 @@ export function usePaymentLink(id: string) {
             setLoading(true);
             setError(null);
 
-            // Récupérer le lien de paiement spécifique
+            // Récupération du lien de paiement spécifique
             const { data, error: supabaseError } = await (supabase as any)
                 .from('payments')
                 .select('*')
                 .eq('id', id)
-                .eq('freelancer_id', user.id) // Sécurité : seulement ses propres liens
+                .eq('freelancer_id', user.id) 
                 .single();
 
             if (supabaseError) {
@@ -39,7 +39,7 @@ export function usePaymentLink(id: string) {
                 return;
             }
 
-            // Transformer les données pour correspondre à l'interface PaymentLink
+            // Transformation des données pour correspondre à l'interface PaymentLink
             const transformedData: PaymentLink = {
                 id: data.id,
                 clientName: data.client_name,

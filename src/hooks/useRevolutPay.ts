@@ -8,9 +8,9 @@ export function useRevolutPay() {
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
 
-    /**
-     * Créer un paiement Revolut et mettre à jour la base de données
-     */
+    
+     //Création d'un paiement Revolut et mise à jour de la base de données
+     
     const createPayment = async (
         paymentLinkId: string,
         paymentData: {
@@ -25,7 +25,7 @@ export function useRevolutPay() {
             setLoading(true);
             setError(null);
 
-            // 1. Créer l'ordre Revolut
+            //Création d'ordre Revolut
             const revolutRequest: RevolutPaymentRequest = {
                 amount: paymentData.amount,
                 currency: paymentData.currency,
@@ -37,7 +37,7 @@ export function useRevolutPay() {
 
             const revolutOrder = await revolutPayService.createPaymentOrder(revolutRequest);
 
-            // 2. Sauvegarder les détails du paiement dans Supabase
+            //Sauvegarde des détails du paiement dans Supabase
             const { error: supabaseError } = await (supabase as any)
                 .from('payment_transactions')
                 .insert([{
@@ -56,7 +56,7 @@ export function useRevolutPay() {
                 throw new Error('Erreur lors de la sauvegarde du paiement');
             }
 
-            // 3. Mettre à jour le statut du payment link
+            // Mise à jour du statut du payment link
             const { error: updateError } = await (supabase as any)
                 .from('payments')
                 .update({
@@ -91,17 +91,17 @@ export function useRevolutPay() {
         }
     };
 
-    /**
-     * Vérifier le statut d'un paiement Revolut
-     */
+    
+     //Vérification du statut d'un paiement Revolut
+     
     const checkPaymentStatus = async (revolutOrderId: string): Promise<RevolutPaymentResponse | null> => {
         try {
             setLoading(true);
             setError(null);
 
-            // En mode démo, simuler une réponse de succès
+            // En mode démo, simulation d'une réponse de succès
             if (REVOLUT_CONFIG.isDemo || revolutOrderId.startsWith('demo_order_')) {
-                console.log('🎭 Mode DEMO - Simulation du statut de paiement:', revolutOrderId);
+                console.log('Mode DEMO - Simulation du statut de paiement:', revolutOrderId);
 
                 const demoOrder: RevolutPaymentResponse = {
                     id: revolutOrderId,
@@ -118,7 +118,7 @@ export function useRevolutPay() {
                     }
                 };
 
-                // Mettre à jour le statut dans la base de données
+                // Mise à jour du statut dans la base de données
                 await updatePaymentStatus(revolutOrderId, 'COMPLETED', demoOrder);
 
                 return demoOrder;
@@ -126,7 +126,7 @@ export function useRevolutPay() {
 
             const order = await revolutPayService.getOrder(revolutOrderId);
 
-            // Mettre à jour le statut dans la base de données
+            // Mise à jour de statut dans la base de données
             await updatePaymentStatus(revolutOrderId, order.state, order);
 
             return order;
@@ -139,9 +139,9 @@ export function useRevolutPay() {
         }
     };
 
-    /**
-     * Mettre à jour le statut du paiement dans Supabase
-     */
+    
+     //Mise à jour du statut du paiement dans Supabase
+     
     const updatePaymentStatus = async (
         revolutOrderId: string,
         revolutStatus: string,
@@ -156,7 +156,7 @@ export function useRevolutPay() {
                 internalStatus
             });
 
-            // 1. Récupérer la transaction pour obtenir le payment_link_id
+            // Récupération de la transaction pour obtenir le payment_link_id
             const { data: transaction, error: getTransactionError } = await (supabase as any)
                 .from('payment_transactions')
                 .select('payment_link_id')
@@ -174,7 +174,7 @@ export function useRevolutPay() {
                 console.log('🔄 Tentative de mise à jour directe par revolut_order_id');
             }
 
-            // 2. Mettre à jour la transaction
+            // Mise à jour de la transaction
             const { error: transactionError } = await (supabase as any)
                 .from('payment_transactions')
                 .update({
@@ -190,7 +190,7 @@ export function useRevolutPay() {
                 console.log('✅ Transaction mise à jour avec succès');
             }
 
-            // 3. Mettre à jour le payment link
+            // Mise à jour du payment link
             let paymentUpdateResult;
 
             if (transaction?.payment_link_id) {
@@ -222,9 +222,9 @@ export function useRevolutPay() {
             console.log('📊 Résultat mise à jour payment:', paymentUpdateResult);
 
             if (paymentUpdateResult && paymentUpdateResult.error) {
-                console.error('❌ Erreur mise à jour payment:', paymentUpdateResult.error);
+                console.error('Erreur mise à jour payment:', paymentUpdateResult.error);
 
-                // Dernière tentative : rechercher par URL et mettre à jour
+                // Dernière tentative : rechercher par URL et mise à jour
                 console.log('🚨 Dernière tentative de mise à jour...');
                 const { data: allPayments } = await (supabase as any)
                     .from('payments')
@@ -244,9 +244,9 @@ export function useRevolutPay() {
         }
     };
 
-    /**
-     * Traiter un webhook Revolut
-     */
+    
+     //Traitement d'un webhook Revolut
+     
     const handleWebhook = async (webhookData: any) => {
         try {
             const { event, data } = webhookData;

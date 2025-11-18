@@ -1,6 +1,3 @@
-/**
- * Configuration et utilitaires pour Revolut Pay
- */
 
 // Configuration Revolut Pay
 export const REVOLUT_CONFIG = {
@@ -79,9 +76,8 @@ export class RevolutPayService {
         this.secretKey = REVOLUT_CONFIG.secretKey;
     }
 
-    /**
-     * Créer un ordre de paiement Revolut
-     */
+    
+    //Création d'ordre de paiement Revolut
     async createPaymentOrder(request: RevolutPaymentRequest): Promise<RevolutPaymentResponse> {
         // Mode simulation pour les tests
         if (REVOLUT_CONFIG.isDemo) {
@@ -97,7 +93,7 @@ export class RevolutPayService {
                     'Revolut-Api-Version': '2023-09-01'
                 },
                 body: JSON.stringify({
-                    amount: Math.round(request.amount * 100), // Convertir en centimes
+                    amount: Math.round(request.amount * 100), 
                     currency: request.currency,
                     capture_mode: request.capture_mode || 'AUTOMATIC',
                     merchant_order_ext_ref: request.merchant_order_ext_ref,
@@ -123,9 +119,8 @@ export class RevolutPayService {
         }
     }
 
-    /**
-     * Créer un ordre de paiement de démonstration
-     */
+    
+    //Création d'ordre de paiement de démonstration
     private createDemoPaymentOrder(request: RevolutPaymentRequest): Promise<RevolutPaymentResponse> {
         const orderId = `demo_order_${Date.now()}`;
         const demoResponse: RevolutPaymentResponse = {
@@ -145,13 +140,12 @@ export class RevolutPayService {
             }
         };
 
-        console.log('🎭 Mode DEMO Revolut Pay activé - Paiement simulé:', demoResponse);
+        console.log('Mode DEMO Revolut Pay activé - Paiement simulé:', demoResponse);
         return Promise.resolve(demoResponse);
     }
 
-    /**
-     * Récupérer les détails d'un ordre
-     */
+    
+    //Récupération des détails d'un ordre 
     async getOrder(orderId: string): Promise<RevolutPaymentResponse> {
         // Mode simulation pour les tests
         if (REVOLUT_CONFIG.isDemo || orderId.startsWith('demo_order_')) {
@@ -196,9 +190,7 @@ export class RevolutPayService {
         }
     }
 
-    /**
-     * Capturer un paiement (si en mode MANUAL)
-     */
+    
     async capturePayment(orderId: string, amount?: number): Promise<RevolutPaymentResponse> {
         try {
             const body: any = {};
@@ -228,9 +220,8 @@ export class RevolutPayService {
         }
     }
 
-    /**
-     * Annuler un paiement
-     */
+    
+    //Annuler un paiement
     async cancelPayment(orderId: string): Promise<RevolutPaymentResponse> {
         try {
             const response = await fetch(`${this.apiUrl}/orders/${orderId}/cancel`, {
@@ -253,9 +244,8 @@ export class RevolutPayService {
         }
     }
 
-    /**
-     * Convertir le statut Revolut en statut interne
-     */
+    
+    //Convertion de statut Revolut en statut interne
     static mapRevolutStatusToInternal(revolutStatus: string): 'pending' | 'paid' | 'failed' | 'cancelled' {
         const mapping = {
             'COMPLETED': 'paid',

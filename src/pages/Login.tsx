@@ -106,7 +106,7 @@ export default function Login() {
             </form>
 
             {/* Boutons de test temporaires - À SUPPRIMER EN PRODUCTION */}
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            {/* <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800 mb-3 font-medium">🧪 Outils de diagnostic (DEV uniquement)</p>
               <div className="space-y-2">
                 <Button
@@ -153,7 +153,7 @@ export default function Login() {
                   Tester connexion directe
                 </Button>
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-6 text-center space-y-2">
               <Link

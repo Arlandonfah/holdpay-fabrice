@@ -1,9 +1,7 @@
 import { PaymentStatus, PaymentStatusHistory, PaymentDispute } from '@/types/payment';
 
 export class PaymentStatusService {
-  /**
-   * Transitions de statut autorisées
-   */
+ 
   private allowedTransitions: Record<PaymentStatus, PaymentStatus[]> = {
     pending: ['paid', 'expired'],
     paid: ['delivered', 'contested', 'refunded'],
@@ -14,23 +12,14 @@ export class PaymentStatusService {
     expired: [],
   };
 
-  /**
-   * Vérification si une transition de statut est autorisée
-   */
   canTransition(currentStatus: PaymentStatus, newStatus: PaymentStatus): boolean {
     return this.allowedTransitions[currentStatus]?.includes(newStatus) || false;
   }
 
-  /**
-   * Obtenir les transitions possibles depuis un statut
-   */
   getAvailableTransitions(currentStatus: PaymentStatus): PaymentStatus[] {
     return this.allowedTransitions[currentStatus] || [];
   }
 
-  /**
-   * Mise à jour de statut d'un paiement
-   */
   async updatePaymentStatus(
     paymentId: string,
     newStatus: PaymentStatus,
@@ -39,7 +28,6 @@ export class PaymentStatusService {
   ): Promise<PaymentStatusHistory> {
     try {
 
-      //  simulation
       const historyEntry: PaymentStatusHistory = {
         id: `history_${Date.now()}`,
         paymentId,
@@ -49,7 +37,7 @@ export class PaymentStatusService {
         triggeredBy,
       };
 
-      // Sauvegarder dans la base de données
+      
       console.log('Updating payment status:', historyEntry);
 
       return historyEntry;
@@ -59,13 +47,9 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Obtenir l'historique des statuts d'un paiement
-   */
+  
   async getPaymentHistory(paymentId: string): Promise<PaymentStatusHistory[]> {
     try {
-
-
       return [
         {
           id: '1',
@@ -90,9 +74,6 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Marquer un paiement comme livré
-   */
   async markAsDelivered(
     paymentId: string,
     freelancerId: string,
@@ -114,9 +95,6 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Libération les fonds au freelance
-   */
   async releaseFunds(
     paymentId: string,
     triggeredBy: 'system' | 'client' | 'admin',
@@ -138,9 +116,6 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Création d'un litige
-   */
   async createDispute(
     paymentId: string,
     reason: string,
@@ -157,7 +132,6 @@ export class PaymentStatusService {
         evidence,
       };
 
-      // Mise à jour du statut du paiement
       await this.updatePaymentStatus(
         paymentId,
         'contested',
@@ -173,9 +147,6 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Résoudre un litige
-   */
   async resolveDispute(
     disputeId: string,
     resolution: 'refund' | 'release' | 'partial_refund',
@@ -191,9 +162,6 @@ export class PaymentStatusService {
     }
   }
 
-  /**
-   * Vérification si un paiement doit être automatiquement libéré
-   */
   shouldAutoRelease(deliveredAt: string, autoReleaseDays: number = 5): boolean {
     const deliveryDate = new Date(deliveredAt);
     const now = new Date();
@@ -202,9 +170,6 @@ export class PaymentStatusService {
     return daysSinceDelivery >= autoReleaseDays;
   }
 
-  /**
-   * Obtenir le label d'un statut en français
-   */
   getStatusLabel(status: PaymentStatus): string {
     const labels: Record<PaymentStatus, string> = {
       pending: 'En attente',
@@ -218,9 +183,6 @@ export class PaymentStatusService {
     return labels[status];
   }
 
-  /**
-   * Obtenir la couleur d'un statut
-   */
   getStatusColor(status: PaymentStatus): string {
     const colors: Record<PaymentStatus, string> = {
       pending: 'warning',
@@ -235,5 +197,4 @@ export class PaymentStatusService {
   }
 }
 
-// Export singleton
 export const paymentStatusService = new PaymentStatusService();

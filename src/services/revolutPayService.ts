@@ -13,9 +13,6 @@ export class RevolutPayService {
     this.apiUrl = REVOLUT_API_URL;
   }
 
-  /**
-   * Créer un ordre de paiement Revolut
-   */
   async createOrder(params: {
     amount: number;
     currency: string;
@@ -33,7 +30,7 @@ export class RevolutPayService {
           'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          amount: Math.round(params.amount * 100), // Convertir en centimes
+          amount: Math.round(params.amount * 100), 
           currency: params.currency.toUpperCase(),
           description: params.description,
           merchant_order_ext_ref: params.merchantOrderExtRef,
@@ -66,9 +63,6 @@ export class RevolutPayService {
     }
   }
 
-  /**
-   * 
-   */
   async getOrder(orderId: string): Promise<RevolutOrder> {
     try {
       const response = await fetch(`${this.apiUrl}/orders/${orderId}`, {
@@ -92,7 +86,7 @@ export class RevolutPayService {
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         completedAt: data.completed_at,
-        amount: data.amount / 100, // Convertir de centimes en euros
+        amount: data.amount / 100, 
         currency: data.currency,
         description: data.description,
         merchantOrderExtRef: data.merchant_order_ext_ref,
@@ -104,9 +98,6 @@ export class RevolutPayService {
     }
   }
 
-  /**
-   * 
-   */
   async cancelOrder(orderId: string): Promise<void> {
     try {
       const response = await fetch(`${this.apiUrl}/orders/${orderId}/cancel`, {
@@ -148,9 +139,7 @@ export class RevolutPayService {
     }
   }
 
-  /**
-   * Rembourser un paiement
-   */
+
   async refundOrder(orderId: string, amount?: number, reason?: string): Promise<void> {
     try {
       const body: any = {};
@@ -188,5 +177,4 @@ export class RevolutPayService {
   }
 }
 
-// Export singleton
 export const revolutPayService = new RevolutPayService();

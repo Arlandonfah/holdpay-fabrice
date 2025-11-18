@@ -1,15 +1,10 @@
-/**
- * Endpoint pour les webhooks Revolut Pay
- * Ce fichier devrait être déployé comme une fonction serverless ou API endpoint
- */
 
 import { supabase } from '@/integrations/supabase/client';
 import { REVOLUT_CONFIG, RevolutWebhookEvent, revolutPayService } from '@/lib/revolut-pay';
 
 // Fonction pour vérifier la signature du webhook (sécurité)
 function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-    // Implémentation de la vérification de signature Revolut
-    // Cette fonction devrait utiliser HMAC-SHA256 pour vérifier la signature
+
     try {
         const crypto = require('crypto');
         const expectedSignature = crypto
@@ -30,7 +25,7 @@ export async function handleRevolutWebhook(request: Request): Promise<Response> 
         const signature = request.headers.get('revolut-signature');
         const payload = await request.text();
 
-        // Vérifier la signature du webhook
+        // Vérification de la signature du webhook
         if (!signature || !verifyWebhookSignature(payload, signature, REVOLUT_CONFIG.webhookSecret)) {
             console.error('Signature webhook invalide');
             return new Response('Unauthorized', { status: 401 });
@@ -39,7 +34,7 @@ export async function handleRevolutWebhook(request: Request): Promise<Response> 
         const webhookData: RevolutWebhookEvent = JSON.parse(payload);
         console.log('Webhook Revolut reçu:', webhookData);
 
-        // Traiter l'événement selon son type
+        // Traitement de l'événement selon son type
         switch (webhookData.event) {
             case 'ORDER_COMPLETED':
                 await handleOrderCompleted(webhookData);
@@ -68,12 +63,12 @@ export async function handleRevolutWebhook(request: Request): Promise<Response> 
     }
 }
 
-// Gérer la completion d'un ordre (paiement réussi)
+// Géneration du completion d'un ordre (paiement réussi)
 async function handleOrderCompleted(webhookData: RevolutWebhookEvent) {
     const { data } = webhookData;
 
     try {
-        // 1. Mettre à jour la transaction
+        // 1. Mise à jour de la transaction
         const { error: transactionError } = await (supabase as any)
             .from('payment_transactions')
             .update({
@@ -88,7 +83,7 @@ async function handleOrderCompleted(webhookData: RevolutWebhookEvent) {
             console.error('Erreur mise à jour transaction:', transactionError);
         }
 
-        // 2. Mettre à jour le payment link
+        // 2. Mise à jour du payment link
         const { error: paymentError } = await (supabase as any)
             .from('payments')
             .update({
@@ -102,7 +97,7 @@ async function handleOrderCompleted(webhookData: RevolutWebhookEvent) {
             console.error('Erreur mise à jour payment:', paymentError);
         }
 
-        // 3. Envoyer une notification (optionnel)
+        // 3. Envoie d'une notification (optionnel)
         await sendPaymentNotification(data.merchant_order_ext_ref, 'completed');
 
         console.log('Paiement complété avec succès:', data.id);
@@ -111,12 +106,12 @@ async function handleOrderCompleted(webhookData: RevolutWebhookEvent) {
     }
 }
 
-// Gérer l'échec d'un ordre
+// Géneration  d'échec d'un ordre
 async function handleOrderFailed(webhookData: RevolutWebhookEvent) {
     const { data } = webhookData;
 
     try {
-        // 1. Mettre à jour la transaction
+        // 1. Mise à jour de la transaction
         const { error: transactionError } = await (supabase as any)
             .from('payment_transactions')
             .update({
@@ -143,7 +138,7 @@ async function handleOrderFailed(webhookData: RevolutWebhookEvent) {
             console.error('Erreur mise à jour payment:', paymentError);
         }
 
-        // 3. Envoyer une notification d'échec
+        // 3. Envoie d'une notification d'échec
         await sendPaymentNotification(data.merchant_order_ext_ref, 'failed');
 
         console.log('Paiement échoué:', data.id);
@@ -152,12 +147,12 @@ async function handleOrderFailed(webhookData: RevolutWebhookEvent) {
     }
 }
 
-// Gérer l'annulation d'un ordre
+// Géneration d'annulation d'un ordre
 async function handleOrderCancelled(webhookData: RevolutWebhookEvent) {
     const { data } = webhookData;
 
     try {
-        // 1. Mettre à jour la transaction
+        // 1. Mise à jour du transaction
         const { error: transactionError } = await (supabase as any)
             .from('payment_transactions')
             .update({
@@ -171,7 +166,7 @@ async function handleOrderCancelled(webhookData: RevolutWebhookEvent) {
             console.error('Erreur mise à jour transaction:', transactionError);
         }
 
-        // 2. Remettre le payment link en pending
+        // 2. Remis du payment link en pending
         const { error: paymentError } = await (supabase as any)
             .from('payments')
             .update({
@@ -190,12 +185,12 @@ async function handleOrderCancelled(webhookData: RevolutWebhookEvent) {
     }
 }
 
-// Gérer l'autorisation d'un ordre (paiement autorisé mais pas encore capturé)
+// Géneration d'autorisation d'un ordre (paiement autorisé mais pas encore capturé)
 async function handleOrderAuthorised(webhookData: RevolutWebhookEvent) {
     const { data } = webhookData;
 
     try {
-        // Mettre à jour le statut en "processing"
+        // Mise à jour de statut en "processing"
         const { error: transactionError } = await (supabase as any)
             .from('payment_transactions')
             .update({
@@ -227,12 +222,12 @@ async function handleOrderAuthorised(webhookData: RevolutWebhookEvent) {
     }
 }
 
-// Envoyer une notification (email, SMS, etc.)
+// Envoie d'une notification (email, SMS, etc.)
 async function sendPaymentNotification(paymentLinkId: string | undefined, status: string) {
     if (!paymentLinkId) return;
 
     try {
-        // Récupérer les détails du payment link
+        // Récupération des détails du payment link
         const { data: paymentLink } = await (supabase as any)
             .from('payments')
             .select('*')
@@ -241,17 +236,9 @@ async function sendPaymentNotification(paymentLinkId: string | undefined, status
 
         if (!paymentLink) return;
 
-        // Ici, vous pouvez implémenter l'envoi d'emails ou notifications
-        // Par exemple, avec un service comme SendGrid, Mailgun, etc.
+
         console.log(`Notification à envoyer pour ${paymentLinkId}: ${status}`);
 
-        // Exemple d'implémentation :
-        // await sendEmail({
-        //   to: paymentLink.client_email,
-        //   subject: status === 'completed' ? 'Paiement confirmé' : 'Problème avec votre paiement',
-        //   template: status === 'completed' ? 'payment-success' : 'payment-failed',
-        //   data: paymentLink
-        // });
 
     } catch (error) {
         console.error('Erreur envoi notification:', error);

@@ -16,7 +16,7 @@ export default function DemoCheckout() {
     const currency = searchParams.get('currency');
 
     useEffect(() => {
-        // Simulation automatique après 3 secondes
+        
         const timer = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {

@@ -32,7 +32,7 @@ export default function Register() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validation
+    
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Erreur",
@@ -62,7 +62,7 @@ export default function Register() {
       );
 
       if (result.success) {
-        // Supabase peut nécessiter une confirmation email
+       
         toast({
           title: "Compte créé !",
           description: "Vérifiez votre email pour confirmer votre compte, puis connectez-vous."

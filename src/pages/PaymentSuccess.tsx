@@ -18,7 +18,7 @@ export default function PaymentSuccess() {
     const [paymentData, setPaymentData] = useState<any>(null);
     const [verified, setVerified] = useState(false);
 
-    // Récupérer l'ordre ID depuis les paramètres URL
+    
     const orderId = searchParams.get('order_id');
     const revolutOrderId = searchParams.get('revolut_order_id');
 
@@ -36,21 +36,21 @@ export default function PaymentSuccess() {
 
             try {
                 setLoading(true);
-                setVerified(true); // En mode démo, on considère que c'est vérifié
+                setVerified(true); 
 
-                // Déclencher la mise à jour du statut via le hook
+                
                 const orderToCheck = revolutOrderId || orderId;
                 if (orderToCheck) {
                     console.log('🎯 Déclenchement de la mise à jour du statut pour:', orderToCheck);
 
-                    // Appeler checkPaymentStatus pour déclencher la mise à jour
+                    
                     try {
                         await checkPaymentStatus(orderToCheck);
                     } catch (error) {
                         console.log('Erreur lors de la mise à jour du statut (normal en démo):', error);
                     }
 
-                    // Récupérer les données du payment link
+                    
                     const { data, error } = await (supabase as any)
                         .from('payments')
                         .select('*')

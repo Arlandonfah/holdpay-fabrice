@@ -35,7 +35,7 @@ export default function ClientPayment() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
 
-  // Récupérer les données du lien de paiement
+
   useEffect(() => {
     const fetchPaymentData = async () => {
       if (!slug) return;
@@ -44,11 +44,10 @@ export default function ClientPayment() {
         setLoading(true);
         setError(null);
 
-        // Récupérer le lien de paiement par son slug/URL
-        // Essayer d'abord avec l'URL complète, puis avec juste le slug
+       
         let data, fetchError;
 
-        // Première tentative avec l'URL complète
+       
         const result1 = await (supabase as any)
           .from('payments')
           .select('*')
@@ -56,7 +55,7 @@ export default function ClientPayment() {
           .single();
 
         if (result1.error) {
-          // Deuxième tentative avec une recherche par slug dans l'URL
+        
           const result2 = await (supabase as any)
             .from('payments')
             .select('*')
@@ -109,7 +108,7 @@ export default function ClientPayment() {
     setIsProcessing(true);
 
     try {
-      // Créer le paiement Revolut
+      
       const checkoutUrl = await createPayment(paymentData.id, {
         amount: paymentData.amount,
         currency: 'EUR',
@@ -119,7 +118,7 @@ export default function ClientPayment() {
       });
 
       if (checkoutUrl) {
-        // Rediriger vers Revolut Pay
+        
         window.location.href = checkoutUrl;
       } else {
         throw new Error('Impossible de créer le paiement');
@@ -137,14 +136,14 @@ export default function ClientPayment() {
   };
 
   const handleDownloadPDF = () => {
-    // Simulation du téléchargement
+    
     toast({
       title: "Téléchargement en cours",
       description: "Le document va s'ouvrir dans un nouvel onglet"
     });
   };
 
-  // Affichage du loading
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center">
@@ -156,7 +155,7 @@ export default function ClientPayment() {
     );
   }
 
-  // Affichage des erreurs
+  
   if (error || !paymentData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center">

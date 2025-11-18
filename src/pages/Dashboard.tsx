@@ -17,7 +17,7 @@ export default function Dashboard() {
   const { isAuthenticated, userName, signOut, user } = useAuthContext();
   const { paymentLinks, loading, error, refetch } = usePaymentLinks();
 
-  // Mock current user - à remplacer par une vraie authentification
+
   const currentUserId = user?.id || "user123";
 
   const handleCopyLink = async (url: string) => {
@@ -39,7 +39,7 @@ export default function Dashboard() {
   };
 
   const handleViewDetails = (id: string) => {
-    // Navigation vers la page de détails avec la nouvelle route
+    
     navigate(`/dashboard/payment-link/${id}`);
   };
 

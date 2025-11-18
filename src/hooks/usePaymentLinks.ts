@@ -33,7 +33,7 @@ export function usePaymentLinks() {
             setLoading(true);
             setError(null);
 
-            // Récupérer les liens de paiement de l'utilisateur connecté
+            // Récupération des liens de paiement de l'utilisateur connecté
             const { data, error: supabaseError } = await (supabase as any)
                 .from('payments')
                 .select('*')
@@ -46,7 +46,7 @@ export function usePaymentLinks() {
                 return;
             }
 
-            // Transformer les données pour correspondre à l'interface PaymentLink
+            // Transformatio des données pour correspondre à l'interface PaymentLink
             const transformedData: PaymentLink[] = (data || []).map((item: any) => ({
                 id: item.id,
                 clientName: item.client_name,

@@ -15,7 +15,7 @@ export default function PaymentFailure() {
     const [paymentData, setPaymentData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // Récupérer les paramètres d'erreur
+    
     const errorCode = searchParams.get('error_code');
     const errorMessage = searchParams.get('error_message');
     const orderId = searchParams.get('order_id');
@@ -25,7 +25,7 @@ export default function PaymentFailure() {
             if (!slug) return;
 
             try {
-                // Récupérer les données du payment link pour permettre un nouveau paiement
+               
                 const { data, error } = await (supabase as any)
                     .from('payments')
                     .select('*')

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Créer utilisateur Supabase</title>
+</head>
+<body>
+    <h1>Créer un utilisateur de test</h1>
+    <button onclick="createUser()">Créer l'utilisateur admin@gmail.com</button>
+    <button onclick="testLogin()">Tester la connexion</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+
+        const supabase = createClient(
+            'https://qdgouhhpeeclcoefghwo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZ291aGhwZWVjbGNvZWZnaHdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyMjQ4NzIsImV4cCI6MjA3ODgwMDg3Mn0.YN3Oq5Gf64hf3_qV9aOjUOmQCYtBmt5YiHnJk4PLmrw'
+        );
+
+        window.createUser = async function() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Création en cours...';
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: 'admin@gmail.com',
+                    password: 'password123',
+                    options: {
+                        emailRedirectTo: undefined,
+                        data: {
+                            first_name: 'Admin',
+                            last_name: 'User',
+                            full_name: 'Admin User'
+                        }
+                    }
+                });
+
+                if (error) {
+                    result.innerHTML = `❌ Erreur: ${error.message}`;
+                } else {
+                    result.innerHTML = `✅ Utilisateur créé! ID: ${data.user?.id}`;
+                    if (!data.user?.email_confirmed_at) {
+                        result.innerHTML += '<br>⚠️ Va dans Supabase Dashboard > Auth > Users et confirme l\'utilisateur';
+                    }
+                }
+            } catch (error) {
+                result.innerHTML = `❌ Erreur: ${error.message}`;
+            }
+        };
+
+        window.testLogin = async function() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Test de connexion...';
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'admin@gmail.com',
+                    password: 'password123'
+                });
+
+                if (error) {
+                    result.innerHTML = `❌ Erreur de connexion: ${error.message}`;
+                } else {
+                    result.innerHTML = `✅ Connexion réussie! User: ${data.user?.email}`;
+                }
+            } catch (error) {
+                result.innerHTML = `❌ Erreur: ${error.message}`;
+            }
+        };
+    </script>
+</body>
+</html>
