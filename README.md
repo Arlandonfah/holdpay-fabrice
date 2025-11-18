@@ -1,78 +1,166 @@
-# Bienvenue sur le projet Lovable "Holdpay-fabrice"
+# Holdpay – plate‑forme de paiement avec Supabase & Revolut
 
-## Informations sur le projet
+Projet front-end (Vite + React + TypeScript) pour la démo **Holdpay** : inscription / connexion utilisateur, création de liens de paiement, suivi du statut de paiement et intégration Revolut.
 
-**URL** : https://holdpay-fabrice.lovable.app/
+URL de prod Lovable : `https://holdpay-fabrice.lovable.app/`
 
-## Comment puis-vous modifier ce code ?
+---
 
-Il existe plusieurs façons de modifier l' application.
+## 1. Installation et exécution en local
 
-**Utiliser Lovable**
+### 1.1. Prérequis
 
-Rendez-vous simplement sur le [projet Lovable](https://lovable.dev/projects/2e10987d-9d5c-4ad9-af37-5502ab006727) et suivez les instructions.
+- **Node.js** ≥ 18
+- **npm** (fourni avec Node)
+- Un compte **Supabase** (projet créé)
+- (Optionnel) Compte **Revolut Merchant** en mode sandbox
 
-Les modifications effectuées via Lovable seront automatiquement enregistrées dans ce dépôt.
-
-**Utiliser votre IDE préféré**
-
-Si vous souhaitez travailler en local avec votre propre IDE, vous pouvez cloner ce dépôt et y envoyer vos modifications. Les modifications envoyées seront également prises en compte dans Lovable.
-
-La seule condition requise est l'installation de Node.js et npm 
-
-Suivez ces étapes :
+### 1.2. Cloner le dépôt
 
 ```sh
-# Étape 1 : Clonez le dépôt à l'aide de l'URL Git du projet.
-
 git clone https://github.com/Arlandonfah/holdpay-fabrice.git
+cd holdpay-fabrice
+```
 
-# Étape 2 : Accédez au répertoire du projet.
+### 1.3. Installation des dépendances
 
-cd <VOTRE_NOM_DE_PROJET>
+```sh
+npm install
+```
 
-# Étape 3 : Installez les dépendances nécessaires.
+### 1.4. Configuration des variables d’environnement
 
-npm i
+Copier le fichier d’exemple puis le renseigner :
 
-# Étape 4 : Démarrez le serveur de développement avec rechargement automatique et aperçu instantané.
+```sh
+cp .env.example .env
+```
 
+Dans `.env` :
+
+- **Supabase**
+
+  - `VITE_SUPABASE_URL` : URL du projet Supabase
+  - `VITE_SUPABASE_PUBLISHABLE_KEY` : clé `anon` (publique) Supabase
+  - `VITE_SUPABASE_PROJECT_ID` : identifiant du projet (ref Supabase)
+- **Revolut (sandbox)**
+
+  - `VITE_REVOLUT_PUBLIC_KEY`
+  - `VITE_REVOLUT_SECRET_KEY`
+  - `VITE_REVOLUT_WEBHOOK_SECRET`
+- **URLs de l’application**
+
+  - `VITE_APP_URL` : URL locale (ex. `http://localhost:5173`)
+  - `VITE_SUCCESS_URL` : URL de redirection après paiement réussi
+  - `VITE_FAILURE_URL` : URL de redirection après échec
+
+### 1.5. Initialiser la base Supabase
+
+Dans le dashboard Supabase (onglet **SQL**), exécuter les scripts du dossier `sql/` dans cet ordre :
+
+- `sql/create_users_table.sql`
+- `sql/create_payments_table.sql`
+- `sql/create_payment_transactions.sql`
+- `sql/add_missing_columns.sql`
+
+Ces scripts créent les tables `users`, `payments`, `payment_transactions` et ajoutent les colonnes / index nécessaires.
+
+### 1.6. Lancer le serveur de développement
+
+```sh
 npm run dev
 ```
 
-**Modifier un fichier directement dans GitHub**
+Par défaut l’application est accessible sur `http://localhost:5173`.
 
-- Accédez au(x) fichier(s) souhaité(s).
-- Cliquez sur le bouton « Modifier » (icône en forme de crayon) en haut à droite de la fenêtre du fichier.
-- Apportez vos modifications et enregistrez-les.
+---
 
-**Utiliser GitHub Codespaces**
+## 2. Scénarios de test
 
-- Accédez à la page principale de votre dépôt.
-- Cliquez sur le bouton « Code » (bouton vert) en haut à droite.
-- Sélectionnez l'onglet « Codespaces ».
-- Cliquez sur « Nouvel espace de code » pour créer un nouvel environnement Codespace.
-- Modifiez les fichiers directement dans l'espace de code, puis validez et envoyez vos modifications une fois terminées.
+### 2.1. Authentification
 
-## Quelles technologies sont utilisées pour ce projet ?
+- **Inscription**
 
-Ce projet est développé avec :
+  - Aller sur `/register`
+  - Renseigner prénom, nom, email et mot de passe
+  - Un utilisateur est créé dans Supabase Auth et dans la table `users`
+  - Si l’option *Confirm email* est activée dans Supabase, confirmer l’email avant de tester la connexion
+- **Connexion**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase
+  - Aller sur `/login`
+  - Se connecter avec l’email / mot de passe créés
+  - En cas d’erreur, un toast avec le message Supabase est affiché
 
-## Comment déployer ce projet ?
+### 2.2. Liens de paiement
 
-Ouvrez simplement [Lovable](https://lovable.dev/projects/2e10987d-9d5c-4ad9-af37-5502ab006727) et cliquez sur Partager -> Publier.
+- Depuis le dashboard, créer un **lien de paiement** (montant, description, etc.)
+- Partager / ouvrir le lien côté client (`/client-payment/...`)
+- Payer via Revolut sandbox
+- Vérifier sur le dashboard que le statut de paiement se met à jour (grâce aux webhooks Revolut et au service `paymentStatusService`)
 
-## Puis-je connecter un domaine personnalisé à mon projet Lovable ?
+### 2.3. Vérifier la base de données
 
-Oui !
+Dans Supabase, onglet **Table editor** :
 
-Pour connecter un domaine, accédez à Projet > Paramètres > Domaines et cliquez sur Connecter un domaine.
+- Table `users` : contient les profils utilisateurs
+- Table `payments` : contient les liens de paiement
+- Table `payment_transactions` : contient l’historique des tentatives de paiement
 
-Pour en savoir plus, consultez : [Configurer un domaine personnalisé](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
+
+## 3. Choix techniques principaux
+
+- **Vite + React + TypeScript**
+
+  - Vite pour un dev server rapide et un build optimisé
+  - React/TS pour une base moderne, typée et composable
+- **Supabase**
+
+  - Authentification (email + mot de passe) via `supabase.auth`
+  - Base de données Postgres managée pour stocker `users`, `payments`, `payment_transactions`
+  - Intégration via `src/integrations/supabase/client.ts` et types générés dans `src/integrations/supabase/types.ts`
+- **Revolut Pay**
+
+  - Intégration côté front via `src/lib/revolut-pay.ts` et `src/hooks/useRevolutPay.ts`
+  - Webhook Revolut géré par `src/api/webhooks/revolut.ts`
+  - Services métier dans `src/services/revolutPayService.ts` et `src/services/paymentStatusService.ts`
+- **UI & Design**
+
+  - **shadcn-ui** et **Tailwind CSS** pour les composants et le styling
+  - Composants métiers : `PaymentMethodSelector`, `PaymentStatusManager`, `payment-link-card`, etc.
+- **Architecture front-end**
+
+  - `src/pages/` : pages principales (Home, Register, Login, Dashboard, PaymentSuccess/Failure, etc.)
+  - `src/hooks/` : hooks métier (`useAuth`, `usePaymentLinks`, `useRevolutPay`…)
+  - `src/contexts/AuthContext.tsx` : contexte d’auth partagé
+  - `src/services/` : logique d’accès aux APIs et de suivi des paiements
+
+---
+
+## 4. Travailler avec Lovable
+
+### 4.1. Modifier le code via Lovable
+
+- Ouvrir le [projet Lovable](https://lovable.dev/projects/2e10987d-9d5c-4ad9-af37-5502ab006727)
+- Modifier le code dans l’éditeur Lovable
+- Les modifications sont automatiquement poussées sur ce dépôt GitHub
+
+### 4.2. Travailler en local avec votre IDE
+
+Vous pouvez également suivre les étapes d’installation ci‑dessus, utiliser votre IDE puis pousser vos changements sur GitHub. Lovable les prendra en compte automatiquement.
+
+### 4.3. Déploiement via Lovable
+
+- Ouvrir le projet sur Lovable
+- Cliquer sur **Share → Publish** pour publier la dernière version
+
+---
+
+## 5. Domaine personnalisé
+
+Oui, il est possible de connecter un domaine personnalisé.
+
+- Aller dans **Project → Settings → Domains** sur Lovable
+- Cliquer sur **Connect a domain** et suivre l’assistant
+
+Plus de détails : [Configurer un domaine personnalisé](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
