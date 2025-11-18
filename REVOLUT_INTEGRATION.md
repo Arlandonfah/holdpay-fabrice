@@ -29,7 +29,7 @@ Cette intégration permet d'utiliser Revolut Pay comme méthode de paiement alte
 
 ### 1. Variables d'environnement
 
-Créez un fichier `.env` basé sur `.env.example` :
+Creation d'un fichier `.env` basé sur `.env.example` :
 
 ```bash
 # Revolut Pay Configuration (Sandbox)
@@ -44,7 +44,7 @@ VITE_FAILURE_URL=http://localhost:5173/payment/failure
 
 ### 2. Base de données Supabase
 
-Exécutez le script SQL dans `sql/create_payment_transactions.sql` :
+Exécution de script SQL dans `sql/create_payment_transactions.sql` :
 
 ```sql
 -- Créer la table payment_transactions
