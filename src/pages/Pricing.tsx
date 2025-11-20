@@ -10,7 +10,7 @@ import { Check, Info, Shield } from "lucide-react";
 const plans = [
   {
     name: "Launch",
-    price: "0 €",
+    price: "0 MGA",
     frequency: "par mois",
     description: "Idéal pour valider un produit et sécuriser les premiers paiements.",
     highlights: ["Jusqu'à 50 000 € d'encours", "Workflows préconfigurés", "Support communautaire"],
@@ -19,7 +19,7 @@ const plans = [
   },
   {
     name: "Scale",
-    price: "449 €",
+    price: "40.000 MGA",
     frequency: "par mois + 0,35 % / transaction",
     description: "Pour les fintechs et plateformes qui gèrent plusieurs scénarios d'escrow.",
     highlights: [
@@ -61,7 +61,7 @@ const serviceAddons = [
   {
     title: "Escrow multi-entités",
     description: "Structurez plusieurs comptes de cantonnement avec gouvernance différenciée.",
-    badge: "+ 190 € / entité",
+    badge: "+ 190 MGA / entité",
   },
   {
     title: "Pack conformité avancé",
@@ -135,9 +135,8 @@ export default function Pricing() {
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={`p-8 rounded-3xl border ${
-                plan.accent ? "border-primary/80 bg-gradient-to-br from-primary/30 via-white/5 to-slate-900" : "border-white/10 bg-white/5"
-              }`}
+              className={`p-8 rounded-3xl border ${plan.accent ? "border-primary/80 bg-gradient-to-br from-primary/30 via-white/5 to-slate-900" : "border-white/10 bg-white/5"
+                }`}
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-semibold">{plan.name}</h3>
