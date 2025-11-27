@@ -81,7 +81,78 @@ Par défaut l’application est accessible sur `http://localhost:5173`.
 
 ---
 
-## 2. Scénarios de test
+## 2. Utilisation avec Docker
+
+### 2.1. Prérequis
+
+- **Docker** ≥ 20.10
+- **Docker Compose** ≥ 2.0
+
+### 2.2. Développement avec Docker Compose
+
+Docker Compose permet de lancer l'application en mode développement avec hot-reload :
+
+```sh
+# Copier le fichier d'environnement
+cp .env.example .env
+
+# Configurer les variables dans .env (voir section 1.4)
+
+# Lancer l'application
+docker-compose up
+
+# Ou en arrière-plan
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter l'application
+docker-compose down
+```
+
+L'application sera accessible sur `http://localhost:8080`.
+
+### 2.3. Production avec Docker
+
+Pour construire et lancer l'application en mode production :
+
+```sh
+# Construire l'image Docker
+docker build -t holdpay-app .
+
+# Lancer le conteneur (avec les variables d'environnement)
+docker run -p 80:80 --env-file .env holdpay-app
+
+# Ou avec des variables spécifiques
+docker run -p 80:80 \
+  -e VITE_SUPABASE_URL=your_url \
+  -e VITE_SUPABASE_PUBLISHABLE_KEY=your_key \
+  holdpay-app
+```
+
+L'application sera accessible sur `http://localhost`.
+
+### 2.4. Commandes Docker utiles
+
+```sh
+# Reconstruire l'image sans cache
+docker-compose build --no-cache
+
+# Voir les conteneurs en cours d'exécution
+docker ps
+
+# Accéder au shell d'un conteneur
+docker-compose exec web sh
+
+# Supprimer les conteneurs et volumes
+docker-compose down -v
+```
+
+---
+
+## 3. Scénarios de test
+
 
 ### 2.1. Authentification
 
